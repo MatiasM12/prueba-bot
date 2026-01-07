@@ -58,7 +58,7 @@ client.once(Events.ClientReady, async c => {
   console.log(`🤖 Bot conectado como ${c.user.tag}`);
 
   cron.schedule(
-    '22 20 * * *',
+    '45 9 * * *',
     async () => {
       try {
         const guild = client.guilds.cache.first();
@@ -112,7 +112,7 @@ client.once(Events.ClientReady, async c => {
 
 
   cron.schedule(
-    '23 20 * * *', // 09:20 AM
+    '20 9 * * *', // 09:20 AM
     async () => {
       try {
         if (alertaEnviadaHoy) return;
