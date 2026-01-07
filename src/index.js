@@ -173,7 +173,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.login("MTQ1NzU0NjUzNTEzODIzNDQ1MQ.GMmyQf.UW8iYfRL8mEEoUmeR8tr1ZlSM8gaqw8KL9puG0"); //config.token
 
-cron.schedule('*/30 * * * *', async () => {
+cron.schedule('*/5 * * * *', async () => {
   const KEEP_ALIVE_URL = 'https://missing-shanta-maty-a48c36d3.koyeb.app/';
   
   try {
@@ -183,6 +183,7 @@ cron.schedule('*/30 * * * *', async () => {
     console.error('❌ Error haciendo ping:', error.message);
   }
 });
+
 
 
 
