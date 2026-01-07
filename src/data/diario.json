@@ -1,0 +1,19 @@
+{
+  "miembros": [
+    {
+      "id": "1977",
+      "nombre": "Ana",
+      "activo": false
+    },
+    {
+      "id": "456",
+      "nombre": "Juan",
+      "activo": true
+    },
+    {
+      "id": "123",
+      "nombre": "Matias",
+      "activo": true
+    }
+  ]
+}

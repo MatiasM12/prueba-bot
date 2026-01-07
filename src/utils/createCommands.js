@@ -1,27 +1,30 @@
-const fs = require("fs");
-const { REST, Routes } = require("discord.js");
-const config = require("../../config.json");
+const { REST, Routes } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+const config = require('../../config.json');
+
 const commands = [];
-const slashCommandsFiles = fs
-  .readdirSync("./src/slashCommands")
-  .filter((file) => file.endsWith("js"));
+const commandsPath = path.join(__dirname, '../slashCommands');
+const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
-for (const file of slashCommandsFiles) {
-  const slash = require(`../slashCommands/${file}`);
-  commands.push(slash.data.toJSON());
+for (const file of commandFiles) {
+  const command = require(path.join(commandsPath, file));
+  commands.push(command.data.toJSON());
 }
 
-const rest = new REST({ version: "10" }).setToken(config.token);
+const rest = new REST({ version: '10' }).setToken(config.token);
 
-createSlash();
-
-async function createSlash() {
+(async () => {
   try {
-    await rest.put(Routes.applicationCommands(config.botId), {
-      body: commands,
-    });
-    console.log("[Slash Commands] Agregados.");
-  } catch (e) {
-    console.error(e);
+    console.log('⏳ Registrando slash commands...');
+
+    await rest.put(
+      Routes.applicationCommands(config.botId),
+      { body: commands }
+    );
+
+    console.log('✅ Slash commands registrados');
+  } catch (error) {
+    console.error(error);
   }
-}
+})();
