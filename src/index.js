@@ -57,7 +57,7 @@ client.once(Events.ClientReady, async c => {
   console.log(`🤖 Bot conectado como ${c.user.tag}`);
 
   cron.schedule(
-    '53 20 * * *',
+    '30 11 * * *',
     async () => {
       try {
         const guild = client.guilds.cache.first();
@@ -172,3 +172,4 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 client.login("MTQ1NzU0NjUzNTEzODIzNDQ1MQ.GMmyQf.UW8iYfRL8mEEoUmeR8tr1ZlSM8gaqw8KL9puG0"); //config.token
+
