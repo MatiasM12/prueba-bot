@@ -7,6 +7,7 @@ const express = require("express");
 const app = express();
 
 const DATA_PATH = path.join(__dirname, 'data', 'diario.json');
+const KEEP_ALIVE_URL = 'https://missing-shanta-maty-a48c36d3.koyeb.app/';
 
 const client = new Client({
   intents: [
@@ -57,7 +58,7 @@ client.once(Events.ClientReady, async c => {
   console.log(`🤖 Bot conectado como ${c.user.tag}`);
 
   cron.schedule(
-    '30 11 * * *',
+    '22 20 * * *',
     async () => {
       try {
         const guild = client.guilds.cache.first();
@@ -80,15 +81,27 @@ client.once(Events.ClientReady, async c => {
 
         const responsable = data.miembros[index];
 
+        // 👉 calcular siguiente ANTES de mover
+        const siguiente = data.miembros
+          .slice(index + 1)
+          .find(m => m.activo);
+
         // mover al final
         data.miembros.splice(index, 1);
         data.miembros.push(responsable);
         guardarLista(data);
 
-        await channel.send(
+        let mensaje =
           `📢 **Diario de mañana**\n` +
-          `👤 Le toca a: ${responsable.nombre} 😎\n`
-        );
+          `👤 Le toca a: <@${responsable.id}> 😎\n`;
+
+        if (siguiente) {
+          mensaje += `⏭️ Si se duerme, sigue: <@${siguiente.id}> ☕`;
+        } else {
+          mensaje += `⏭️ No hay otro miembro activo como backup`;
+        }
+
+        await channel.send(mensaje);
 
       } catch (err) {
         console.error('❌ Error en cron:', err);
@@ -97,8 +110,9 @@ client.once(Events.ClientReady, async c => {
     { timezone: 'America/Argentina/Buenos_Aires' }
   );
 
+
   cron.schedule(
-    '20 9 * * *', // 09:20 AM
+    '23 20 * * *', // 09:20 AM
     async () => {
       try {
         if (alertaEnviadaHoy) return;
@@ -140,8 +154,6 @@ client.once(Events.ClientReady, async c => {
     },
     { timezone: 'America/Argentina/Buenos_Aires' }
   );
-
-
 });
 
 
@@ -171,11 +183,9 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
-client.login("MTQ1NzU0NjUzNTEzODIzNDQ1MQ.GMmyQf.UW8iYfRL8mEEoUmeR8tr1ZlSM8gaqw8KL9puG0"); //config.token
+client.login(config.token); 
 
 cron.schedule('*/5 * * * *', async () => {
-  const KEEP_ALIVE_URL = 'https://missing-shanta-maty-a48c36d3.koyeb.app/';
-  
   try {
     const res = await fetch(KEEP_ALIVE_URL);
     console.log(`🔁 Ping a Koyeb OK - status ${res.status}`);
@@ -183,8 +193,4 @@ cron.schedule('*/5 * * * *', async () => {
     console.error('❌ Error haciendo ping:', error.message);
   }
 });
-
-
-
-
 

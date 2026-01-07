@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('diario_toggle')
+    .setName('cambiar_estado')
     .setDescription('Activar o desactivar un miembro')
     .addUserOption(opt =>
       opt.setName('usuario')

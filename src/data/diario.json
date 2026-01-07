@@ -8,11 +8,21 @@
     {
       "id": "456",
       "nombre": "Juan",
-      "activo": true
+      "activo": false
     },
     {
       "id": "123",
       "nombre": "Matias",
+      "activo": false
+    },
+    {
+      "id": "599434618172866560",
+      "nombre": "matias1212",
+      "activo": true
+    },
+    {
+      "id": "1457546535138234451",
+      "nombre": "Prueba Bot",
       "activo": true
     }
   ]

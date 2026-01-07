@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('diario_add')
+    .setName('agregar_miembro')
     .setDescription('Agregar un miembro al diario')
     .addUserOption(opt =>
       opt.setName('usuario')

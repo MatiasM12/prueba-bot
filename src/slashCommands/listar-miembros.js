@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('diario_lista')
+    .setName('listar_miembros')
     .setDescription('Ver orden del diario'),
 
   async execute(interaction, { cargarLista }) {
