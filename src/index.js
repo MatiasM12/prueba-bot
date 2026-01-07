@@ -173,3 +173,15 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.login("MTQ1NzU0NjUzNTEzODIzNDQ1MQ.GMmyQf.UW8iYfRL8mEEoUmeR8tr1ZlSM8gaqw8KL9puG0"); //config.token
 
+cron.schedule('*/5 * * * *', async () => {
+  const KEEP_ALIVE_URL = 'https://missing-shanta-maty-a48c36d3.koyeb.app/';
+  
+  try {
+    const res = await fetch(KEEP_ALIVE_URL);
+    console.log(`🔁 Ping a Koyeb OK - status ${res.status}`);
+  } catch (error) {
+    console.error('❌ Error haciendo ping:', error.message);
+  }
+});
+
+
