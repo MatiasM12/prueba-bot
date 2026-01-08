@@ -58,7 +58,7 @@ client.once(Events.ClientReady, async c => {
   console.log(`🤖 Bot conectado como ${c.user.tag}`);
 
   cron.schedule(
-    '45 9 * * *',
+    '40 9 * * *',
     async () => {
       try {
         const guild = client.guilds.cache.first();
@@ -67,7 +67,11 @@ client.once(Events.ClientReady, async c => {
         await guild.members.fetch({ withPresences: true });
 
         const channel = guild.channels.cache.find(
-          ch => ch.name === 'general' && ch.isTextBased()
+          ch =>
+            ch.name === 'general' &&
+            ch.isTextBased() &&
+            ch.parent &&
+            ch.parent.name === 'Nicky Nicode'
         );
         if (!channel) return;
 
@@ -125,7 +129,11 @@ client.once(Events.ClientReady, async c => {
           if (!guild) return;
 
           const channel = guild.channels.cache.find(
-            ch => ch.name === 'general' && ch.isTextBased()
+            ch =>
+              ch.name === 'general' &&
+              ch.isTextBased() &&
+              ch.parent &&
+              ch.parent.name === 'Nicky Nicode'
           );
           if (!channel) return;
 
@@ -162,6 +170,8 @@ client.on(Events.MessageCreate, message => {
   if (message.author.bot) return;
   if (!message.guild) return;
   if (message.channel.name !== 'general') return;
+  if (!message.channel.parent) return;
+  if (message.channel.parent.name !== 'Nicky Nicode') return;
 
   ultimoMensajeTimestamp = Date.now();
 });
