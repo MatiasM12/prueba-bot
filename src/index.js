@@ -3,10 +3,10 @@ const { Client, GatewayIntentBits, Events, Collection } = require('discord.js');
 const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
+const { cargarListaMiembros, guardarListaMiembros, esDiaHabilFecha, obtenerFeriadoFecha } = require('./utils/datos');
 const express = require("express");
 const app = express();
 
-const DATA_PATH = path.join(__dirname, 'data', 'diario.json');
 const KEEP_ALIVE_URL = 'https://missing-shanta-maty-a48c36d3.koyeb.app/';
 
 const client = new Client({
@@ -22,19 +22,7 @@ const client = new Client({
 let ultimoMensajeTimestamp = null;
 let alertaEnviadaHoy = false;
 
-// ================== UTILS ==================
-function cargarLista() {
-  if (!fs.existsSync(DATA_PATH)) {
-    return { miembros: [] };
-  }
-  return JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
-}
-
-function guardarLista(data) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(data, null, 2));
-}
-
-// ================== SLASH COMMANDS ==================
+// Slash Commands
 client.commands = new Collection();
 
 const commandsPath = path.join(__dirname, 'slashCommands');
@@ -45,6 +33,7 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
+// Endpoint para subir como webapp
 app.get("/", (req, res) => {
   res.send("Bot funcionando");
 });
@@ -53,18 +42,16 @@ app.listen(8000, () => {
   console.log("Bot encendido 24/7");
 });
 
-// ================== READY ==================
+// Ready
 client.once(Events.ClientReady, async c => {
   console.log(`🤖 Bot conectado como ${c.user.tag}`);
 
   cron.schedule(
-    '40 9 * * *',
+    '33 19 * * *',
     async () => {
       try {
         const guild = client.guilds.cache.first();
         if (!guild) return;
-
-        await guild.members.fetch({ withPresences: true });
 
         const channel = guild.channels.cache.find(
           ch =>
@@ -73,9 +60,31 @@ client.once(Events.ClientReady, async c => {
             ch.parent &&
             ch.parent.name === 'Nicky Nicode'
         );
-        if (!channel) return;
 
-        const data = cargarLista();
+        if (!channel) return;
+        const diaSiguiente = new Date();
+        diaSiguiente.setDate(diaSiguiente.getDate() + 1);
+
+        if (!esDiaHabilFecha(diaSiguiente)) {
+          const feriado = obtenerFeriadoFecha(diaSiguiente);
+
+          let motivo = 'fin de semana';
+          if (feriado) {
+            motivo = `feriado (${feriado.localName})`;
+          }
+
+          await channel.send(
+            `📅 **Diario de mañana**\n` +
+            `Mañana es ${motivo}, por lo tanto **no habrá diario** 🎉`
+          );
+
+          console.log('📅 Mañana no es día hábil, no se asigna diario');
+          return;
+        }
+
+        await guild.members.fetch({ withPresences: true });
+
+        const data = cargarListaMiembros();
 
         const index = data.miembros.findIndex(m => m.activo);
         if (index === -1) {
@@ -93,7 +102,7 @@ client.once(Events.ClientReady, async c => {
         // mover al final
         data.miembros.splice(index, 1);
         data.miembros.push(responsable);
-        guardarLista(data);
+        guardarListaMiembros(data);
 
         let mensaje =
           `📢 **Diario de mañana**\n` +
@@ -116,9 +125,13 @@ client.once(Events.ClientReady, async c => {
 
 
   cron.schedule(
-    '20 9 * * *', // 09:20 AM
+    '34 19 * * *', // 09:20 AM
     async () => {
       try {
+        if (!esDiaHabilFecha(new Date())) {
+          console.log('📅 Hoy no es día hábil, no se envía diario');
+          return;
+        }
         if (alertaEnviadaHoy) return;
 
         const inicio = new Date();
@@ -165,7 +178,7 @@ client.once(Events.ClientReady, async c => {
 });
 
 
-// ================== INTERACTIONS ==================
+// Interacciones
 client.on(Events.MessageCreate, message => {
   if (message.author.bot) return;
   if (!message.guild) return;
@@ -183,7 +196,7 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!command) return;
 
   try {
-    await command.execute(interaction, { cargarLista, guardarLista });
+    await command.execute(interaction, { cargarListaMiembros, guardarListaMiembros });
   } catch (err) {
     console.error(err);
     await interaction.reply({
@@ -195,6 +208,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.login(config.token); 
 
+// Envia un ping al endpoint para que la instancia no se duerma por inactivdad
 cron.schedule('*/5 * * * *', async () => {
   try {
     const res = await fetch(KEEP_ALIVE_URL);

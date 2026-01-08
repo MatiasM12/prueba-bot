@@ -1,0 +1,68 @@
+{
+  "feriados": [
+    {
+      "date": "2026-01-01",
+      "localName": "Año Nuevo"
+    },
+    {
+      "date": "2026-02-16",
+      "localName": "Carnaval"
+    },
+    {
+      "date": "2026-02-17",
+      "localName": "Carnaval"
+    },
+    {
+      "date": "2026-03-24",
+      "localName": "Día Nacional de la Memoria por la Verdad y la Justicia"
+    },
+    {
+      "date": "2026-04-02",
+      "localName": "Día del Veterano y de los Caídos en la Guerra de Malvinas"
+    },
+    {
+      "date": "2026-04-03",
+      "localName": "Viernes Santo"
+    },
+    {
+      "date": "2026-05-01",
+      "localName": "Día del Trabajador"
+    },
+    {
+      "date": "2026-05-25",
+      "localName": "Día de la Revolución de Mayo"
+    },
+    {
+      "date": "2026-06-17",
+      "localName": "Paso a la Inmortalidad del General Martín Miguel de Güemes"
+    },
+    {
+      "date": "2026-06-20",
+      "localName": "Paso a la Inmortalidad del General Manuel Belgrano"
+    },
+    {
+      "date": "2026-07-09",
+      "localName": "Día de la Independencia"
+    },
+    {
+      "date": "2026-08-17",
+      "localName": "Paso a la Inmortalidad del General José de San Martín"
+    },
+    {
+      "date": "2026-10-12",
+      "localName": "Día del Respeto a la Diversidad Cultural"
+    },
+    {
+      "date": "2026-11-20",
+      "localName": "Día de la Soberanía Nacional"
+    },
+    {
+      "date": "2026-12-08",
+      "localName": "Día de la Inmaculada Concepción de María"
+    },
+    {
+      "date": "2026-12-25",
+      "localName": "Navidad"
+    }
+  ]
+}
