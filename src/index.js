@@ -123,7 +123,6 @@ client.once(Events.ClientReady, async c => {
     { timezone: 'America/Argentina/Buenos_Aires' }
   );
 
-
   cron.schedule(
     '34 19 * * *', // 09:20 AM
     async () => {
