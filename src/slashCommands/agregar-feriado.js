@@ -55,7 +55,7 @@ module.exports = {
       localName: nombre
     });
 
-    guardarListaMiembros(data);
+    guardarFeriados(data);
 
     await interaction.reply(
       `✅ Feriado agregado:\n📅 **${fecha}** – ${nombre}`
