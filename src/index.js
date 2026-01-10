@@ -78,6 +78,7 @@ cron.schedule('* * * * *', async () => {
 // ================= FUNCIONES =================
 async function enviarDiario(guild, channel) {
   try {
+    if (!esDiaHabilFecha(new Date())) return;
     const proximoDiaHabil = obtenerProximoDiaHabil(new Date());
 
     await guild.members.fetch();

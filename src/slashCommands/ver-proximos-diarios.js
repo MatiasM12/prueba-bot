@@ -35,7 +35,7 @@ module.exports = {
     let fecha = new Date();
     let index = 0;
 
-    let resultado = '📅 **Simulación del diario**\n\n';
+    let resultado = '📅 **Simulación del diario:**\n\n';
 
     for (let i = 0; i < dias; i++) {
       fecha = obtenerProximoDiaHabil(fecha);
@@ -48,7 +48,7 @@ module.exports = {
         month: '2-digit'
       });
 
-      resultado += `• ${fechaTexto} → ${responsable.nombre}>\n`;
+      resultado += `• ${fechaTexto} → ${responsable.nombre}\n`;
 
       index++;
       if (index >= activos.length) index = 0;
