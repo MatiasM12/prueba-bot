@@ -16,10 +16,10 @@ module.exports = {
         .setMinValue(1)
     ),
 
-  async execute(interaction, { cargarLista, guardarLista }) {
+  async execute(interaction, { cargarListaMiembros, guardarListaMiembros }) {
     const user = interaction.options.getUser('usuario');
     const posicion = interaction.options.getInteger('posicion');
-    const data = cargarLista();
+    const data = cargarListaMiembros();
 
     const indexActual = data.miembros.findIndex(m => m.id === user.id);
 
@@ -52,7 +52,7 @@ module.exports = {
     // insertar en la nueva posición
     data.miembros.splice(nuevaPosicion, 0, miembro);
 
-    guardarLista(data);
+    guardarListaMiembros(data);
 
     await interaction.reply(
       `🔀 **Orden actualizado**\n` +

@@ -10,9 +10,9 @@ module.exports = {
         .setRequired(true)
     ),
 
-  async execute(interaction, { cargarLista, guardarLista }) {
+  async execute(interaction, { cargarListaMiembros, guardarListaMiembros }) {
     const user = interaction.options.getUser('usuario');
-    const data = cargarLista();
+    const data = cargarListaMiembros();
 
     const miembro = data.miembros.find(m => m.id === user.id);
     if (!miembro) {
@@ -20,7 +20,7 @@ module.exports = {
     }
 
     miembro.activo = !miembro.activo;
-    guardarLista(data);
+    guardarListaMiembros(data);
 
     await interaction.reply(
       `🔄 ${user.username} ahora está ${miembro.activo ? '🟢 activo' : '🔴 inactivo'}`

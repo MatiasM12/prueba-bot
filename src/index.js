@@ -3,17 +3,24 @@ const { Client, GatewayIntentBits, Events, Collection } = require('discord.js');
 const cron = require('node-cron');
 const fs = require('fs');
 const path = require('path');
-const { cargarListaMiembros, guardarListaMiembros, esDiaHabilFecha, obtenerFeriadoFecha } = require('./utils/datos');
 const express = require("express");
-const app = express();
 
+const {
+  cargarListaMiembros,
+  guardarListaMiembros,
+  esDiaHabilFecha,
+  obtenerProximoDiaHabil
+} = require('../src/utils/datos.js');
+
+const { obtenerConfigGuild } = require('../src/utils/config-guilds.js');
+
+const app = express();
 const KEEP_ALIVE_URL = 'https://missing-shanta-maty-a48c36d3.koyeb.app/';
 
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent
   ]
@@ -22,10 +29,9 @@ const client = new Client({
 let ultimoMensajeTimestamp = null;
 let alertaEnviadaHoy = false;
 
-// Slash Commands
+// ================= SLASH COMMANDS =================
 client.commands = new Collection();
-
-const commandsPath = path.join(__dirname, 'slashCommands');
+const commandsPath = path.join(__dirname, '../src/slashCommands');
 const commandFiles = fs.readdirSync(commandsPath).filter(f => f.endsWith('.js'));
 
 for (const file of commandFiles) {
@@ -33,157 +39,123 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command);
 }
 
-// Endpoint para subir como webapp
-app.get("/", (req, res) => {
-  res.send("Bot funcionando");
+// ================= WEB =================
+app.get("/", (req, res) => res.send("Bot funcionando"));
+app.listen(8000, () => console.log("Bot encendido 24/7"));
+
+// ================= READY =================
+client.once(Events.ClientReady, () => {
+  console.log(`🤖 Bot conectado como ${client.user.tag}`);
 });
 
-app.listen(8000, () => {
-  console.log("Bot encendido 24/7");
-});
+// ================= CRON PRINCIPAL =================
+// Corre cada minuto y compara con config del guild
+cron.schedule('* * * * *', async () => {
+  const ahora = new Date().toLocaleTimeString('es-AR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'America/Argentina/Buenos_Aires'
+  });
 
-// Ready
-client.once(Events.ClientReady, async c => {
-  console.log(`🤖 Bot conectado como ${c.user.tag}`);
+  for (const guild of client.guilds.cache.values()) {
+    const cfg = obtenerConfigGuild(guild.id);
+    if (!cfg?.canalId) continue;
 
-  cron.schedule(
-    '33 19 * * *',
-    async () => {
-      try {
-        const guild = client.guilds.cache.first();
-        if (!guild) return;
+    const channel = guild.channels.cache.get(cfg.canalId);
+    if (!channel?.isTextBased()) continue;
 
-        const channel = guild.channels.cache.find(
-          ch =>
-            ch.name === 'general' &&
-            ch.isTextBased() &&
-            ch.parent &&
-            ch.parent.name === 'Nicky Nicode'
-        );
+    if (ahora === cfg.horaDiario) {
+      await enviarDiario(guild, channel);
+    }
 
-        if (!channel) return;
-        const diaSiguiente = new Date();
-        diaSiguiente.setDate(diaSiguiente.getDate() + 1);
+    if (ahora === cfg.horaAlerta) {
+      await enviarAlerta(guild, channel);
+    }
+  }
+}, { timezone: 'America/Argentina/Buenos_Aires' });
 
-        if (!esDiaHabilFecha(diaSiguiente)) {
-          const feriado = obtenerFeriadoFecha(diaSiguiente);
+// ================= FUNCIONES =================
+async function enviarDiario(guild, channel) {
+  try {
+    const proximoDiaHabil = obtenerProximoDiaHabil(new Date());
 
-          let motivo = 'fin de semana';
-          if (feriado) {
-            motivo = `feriado (${feriado.localName})`;
-          }
+    await guild.members.fetch();
 
-          await channel.send(
-            `📅 **Diario de mañana**\n` +
-            `Mañana es ${motivo}, por lo tanto **no habrá diario** 🎉`
-          );
+    const data = cargarListaMiembros();
+    const index = data.miembros.findIndex(m => m.activo);
 
-          console.log('📅 Mañana no es día hábil, no se asigna diario');
-          return;
-        }
+    if (index === -1) {
+      await channel.send('⚠️ No hay miembros activos para el diario.');
+      return;
+    }
 
-        await guild.members.fetch({ withPresences: true });
+    const responsable = data.miembros[index];
+    const siguiente = data.miembros.slice(index + 1).find(m => m.activo);
 
-        const data = cargarListaMiembros();
+    // rotación
+    data.miembros.splice(index, 1);
+    data.miembros.push(responsable);
+    guardarListaMiembros(data);
 
-        const index = data.miembros.findIndex(m => m.activo);
-        if (index === -1) {
-          await channel.send('⚠️ No hay miembros activos para el diario.');
-          return;
-        }
+    const fechaTexto = proximoDiaHabil.toLocaleDateString('es-AR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: '2-digit'
+    });
 
-        const responsable = data.miembros[index];
+    let mensaje =
+      `📢 **Diario del ${fechaTexto}**\n` +
+      `👤 Le toca a: <@${responsable.id}> 😎\n`;
 
-        // 👉 calcular siguiente ANTES de mover
-        const siguiente = data.miembros
-          .slice(index + 1)
-          .find(m => m.activo);
+    if (siguiente) {
+      mensaje += `⏭️ Backup: <@${siguiente.id}> ☕`;
+    }
 
-        // mover al final
-        data.miembros.splice(index, 1);
-        data.miembros.push(responsable);
-        guardarListaMiembros(data);
+    await channel.send(mensaje);
 
-        let mensaje =
-          `📢 **Diario de mañana**\n` +
-          `👤 Le toca a: <@${responsable.id}> 😎\n`;
+  } catch (err) {
+    console.error('❌ Error enviando diario:', err);
+  }
+}
 
-        if (siguiente) {
-          mensaje += `⏭️ Si se duerme, sigue: <@${siguiente.id}> ☕`;
-        } else {
-          mensaje += `⏭️ No hay otro miembro activo como backup`;
-        }
+async function enviarAlerta(guild, channel) {
+  try {
+    if (!esDiaHabilFecha(new Date())) return;
+    if (alertaEnviadaHoy) return;
 
-        await channel.send(mensaje);
+    const inicio = new Date();
+    inicio.setHours(7, 0, 0, 0);
 
-      } catch (err) {
-        console.error('❌ Error en cron:', err);
-      }
-    },
-    { timezone: 'America/Argentina/Buenos_Aires' }
-  );
+    if (!ultimoMensajeTimestamp || ultimoMensajeTimestamp < inicio.getTime()) {
+      alertaEnviadaHoy = true;
 
-  cron.schedule(
-    '34 19 * * *', // 09:20 AM
-    async () => {
-      try {
-        if (!esDiaHabilFecha(new Date())) {
-          console.log('📅 Hoy no es día hábil, no se envía diario');
-          return;
-        }
-        if (alertaEnviadaHoy) return;
+      await channel.send(
+        `⚠️ **Alerta diaria**\n` +
+        `No hubo mensajes entre **07:00 y ahora**.\n` +
+        `Puede que el responsable del diario se haya dormido 😴`
+      );
+    }
+  } catch (err) {
+    console.error('❌ Error enviando alerta:', err);
+  }
+}
 
-        const inicio = new Date();
-        inicio.setHours(7, 0, 0, 0);
+// ================= RESET DIARIO =================
+cron.schedule('0 0 * * *', () => {
+  alertaEnviadaHoy = false;
+  ultimoMensajeTimestamp = null;
+  console.log('🔄 Reset diario');
+}, { timezone: 'America/Argentina/Buenos_Aires' });
 
-        if (!ultimoMensajeTimestamp || ultimoMensajeTimestamp < inicio.getTime()) {
-          const guild = client.guilds.cache.first();
-          if (!guild) return;
-
-          const channel = guild.channels.cache.find(
-            ch =>
-              ch.name === 'general' &&
-              ch.isTextBased() &&
-              ch.parent &&
-              ch.parent.name === 'Nicky Nicode'
-          );
-          if (!channel) return;
-
-          alertaEnviadaHoy = true;
-
-          await channel.send(
-            `⚠️ **Alerta diaria**\n` +
-            `No hubo mensajes entre **07:00 y 09:20**.\n` +
-            `Es posible que el responsable del diario se haya quedado dormido 😴`
-          );
-        }
-
-      } catch (err) {
-        console.error('❌ Error alerta mañana:', err);
-      }
-    },
-    { timezone: 'America/Argentina/Buenos_Aires' }
-  );
-
-  cron.schedule(
-    '0 0 * * *',
-    () => {
-      alertaEnviadaHoy = false;
-      ultimoMensajeTimestamp = null;
-      console.log('🔄 Reset diario de alerta');
-    },
-    { timezone: 'America/Argentina/Buenos_Aires' }
-  );
-});
-
-
-// Interacciones
+// ================= EVENTOS =================
 client.on(Events.MessageCreate, message => {
   if (message.author.bot) return;
   if (!message.guild) return;
-  if (message.channel.name !== 'general') return;
-  if (!message.channel.parent) return;
-  if (message.channel.parent.name !== 'Nicky Nicode') return;
+
+  const cfg = obtenerConfigGuild(message.guild.id);
+  if (!cfg?.canalId) return;
+  if (message.channel.id !== cfg.canalId) return;
 
   ultimoMensajeTimestamp = Date.now();
 });
@@ -195,7 +167,10 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!command) return;
 
   try {
-    await command.execute(interaction, { cargarListaMiembros, guardarListaMiembros });
+    await command.execute(interaction, {
+      cargarListaMiembros,
+      guardarListaMiembros
+    });
   } catch (err) {
     console.error(err);
     await interaction.reply({
@@ -205,15 +180,12 @@ client.on(Events.InteractionCreate, async interaction => {
   }
 });
 
-client.login(config.token); 
+// ================= LOGIN =================
+client.login(config.token);
 
-// Envia un ping al endpoint para que la instancia no se duerma por inactivdad
+// ================= KEEP ALIVE =================
 cron.schedule('*/5 * * * *', async () => {
   try {
-    const res = await fetch(KEEP_ALIVE_URL);
-    console.log(`🔁 Ping a Koyeb OK - status ${res.status}`);
-  } catch (error) {
-    console.error('❌ Error haciendo ping:', error.message);
-  }
+    await fetch(KEEP_ALIVE_URL);
+  } catch {}
 });
-

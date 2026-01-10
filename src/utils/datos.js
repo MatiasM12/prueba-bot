@@ -42,9 +42,21 @@ function obtenerFeriadoFecha(fecha) {
   return feriadosData.feriados.find(f => f.date === fechaStr) || null;
 }
 
+function obtenerProximoDiaHabil(fechaBase = new Date()) {
+  const fecha = new Date(fechaBase);
+
+  do {
+    fecha.setDate(fecha.getDate() + 1);
+  } while (!esDiaHabilFecha(fecha));
+
+  return fecha;
+}
+
+
 module.exports = {
   cargarListaMiembros,
   guardarListaMiembros,
   esDiaHabilFecha,
-  obtenerFeriadoFecha
+  obtenerFeriadoFecha,
+  obtenerProximoDiaHabil
 };

@@ -5,8 +5,8 @@ module.exports = {
     .setName('listar_miembros')
     .setDescription('Ver orden del diario'),
 
-  async execute(interaction, { cargarLista }) {
-    const data = cargarLista();
+  async execute(interaction, { cargarListaMiembros }) {
+    const data = cargarListaMiembros();
 
     if (data.miembros.length === 0) {
       return interaction.reply('📭 Lista vacía');

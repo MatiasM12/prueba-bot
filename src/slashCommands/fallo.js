@@ -15,7 +15,7 @@ module.exports = {
         .setRequired(true)
     ),
 
-  async execute(interaction, { cargarLista, guardarLista }) {
+  async execute(interaction, { cargarListaMiembros, guardarListaMiembros }) {
     const responsableUser = interaction.options.getUser('responsable');
     const cubrioUser = interaction.options.getUser('cubrio');
 
@@ -26,7 +26,7 @@ module.exports = {
       });
     }
 
-    const data = cargarLista();
+    const data = cargarListaMiembros();
 
     const indexResponsable = data.miembros.findIndex(
       m => m.id === responsableUser.id
@@ -66,7 +66,7 @@ module.exports = {
     // quien cubrió pasa al final
     data.miembros.push(cubrio);
 
-    guardarLista(data);
+    guardarListaMiembros(data);
 
     await interaction.reply(
       `⏰ **Diario marcado como fallido**\n` +

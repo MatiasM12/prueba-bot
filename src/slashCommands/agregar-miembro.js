@@ -10,9 +10,9 @@ module.exports = {
         .setRequired(true)
     ),
 
-  async execute(interaction, { cargarLista, guardarLista }) {
+  async execute(interaction, { cargarListaMiembros, guardarListaMiembros }) {
     const user = interaction.options.getUser('usuario');
-    const data = cargarLista();
+    const data = cargarListaMiembros();
 
     if (data.miembros.some(m => m.id === user.id)) {
       return interaction.reply({ content: '⚠️ Ya está en la lista', ephemeral: true });
@@ -24,7 +24,7 @@ module.exports = {
       activo: true
     });
 
-    guardarLista(data);
+    guardarListaMiembros(data);
 
     await interaction.reply(`✅ ${user.username} agregado al diario`);
   }

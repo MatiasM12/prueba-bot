@@ -44,7 +44,7 @@ module.exports = {
     guardarFeriados(data);
 
     await interaction.reply(
-      `🗑️ Feriado eliminado:\n📅 **${eliminado.date}** – ${eliminado.localName}`
+      `🗑️ Feriado eliminado: **${eliminado.date}** – ${eliminado.localName}`
     );
   }
 };
