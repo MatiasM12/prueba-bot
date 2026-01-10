@@ -1,8 +1,13 @@
 const { SlashCommandBuilder } = require('discord.js');
-const {
-  cargarListaMiembros,
-  obtenerProximoDiaHabil // ✅ usar la real
-} = require('../utils/datos');
+const { cargarListaMiembros, esDiaHabilFecha } = require('../utils/datos');
+
+function obtenerProximoDiaHabil(fecha) {
+  const f = new Date(fecha);
+  do {
+    f.setDate(f.getDate() + 1);
+  } while (!esDiaHabilFecha(f));
+  return f;
+}
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -33,7 +38,6 @@ module.exports = {
     let resultado = '📅 **Simulación del diario**\n\n';
 
     for (let i = 0; i < dias; i++) {
-      // ✅ ahora sí salta feriados + fines de semana
       fecha = obtenerProximoDiaHabil(fecha);
 
       const responsable = activos[index];
@@ -44,7 +48,7 @@ module.exports = {
         month: '2-digit'
       });
 
-      resultado += `• ${fechaTexto} → ${responsable.nombre}\n`;
+      resultado += `• ${fechaTexto} → ${responsable.nombre}>\n`;
 
       index++;
       if (index >= activos.length) index = 0;
