@@ -182,7 +182,7 @@ client.on(Events.InteractionCreate, async interaction => {
 });
 
 // ================= LOGIN =================
-client.login(config.token);
+client.login(process.env.TOKEN);
 
 // ================= KEEP ALIVE =================
 cron.schedule('*/5 * * * *', async () => {
