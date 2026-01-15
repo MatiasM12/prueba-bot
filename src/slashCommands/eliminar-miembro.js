@@ -25,7 +25,7 @@ module.exports = {
 
     const eliminado = data.miembros[index];
 
-    // 🔥 eliminar definitivamente
+    // Eliminar definitivamente
     data.miembros.splice(index, 1);
     guardarListaMiembros(data);
 

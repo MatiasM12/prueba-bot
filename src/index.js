@@ -110,13 +110,13 @@ async function enviarDiario(guild, channel) {
       `👤 Le toca a: <@${responsable.id}> 😎\n`;
 
     if (siguiente) {
-      mensaje += `⏭️ Backup: <@${siguiente.id}> ☕`;
+      mensaje += `⏭️ Si no lo puede dar le toca: <@${siguiente.id}> ☕`;
     }
 
     await channel.send(mensaje);
 
   } catch (err) {
-    console.error('❌ Error enviando diario:', err);
+    console.error('Error enviando diario:', err);
   }
 }
 
@@ -134,11 +134,11 @@ async function enviarAlerta(guild, channel) {
       await channel.send(
         `⚠️ **Alerta diaria**\n` +
         `No hubo mensajes entre **07:00 y ahora**.\n` +
-        `Puede que el responsable del diario se haya dormido 😴`
+        `Puede ser que el responsable del diario se haya dormido 😴`
       );
     }
   } catch (err) {
-    console.error('❌ Error enviando alerta:', err);
+    console.error('Error enviando alerta:', err);
   }
 }
 
@@ -146,7 +146,7 @@ async function enviarAlerta(guild, channel) {
 cron.schedule('0 0 * * *', () => {
   alertaEnviadaHoy = false;
   ultimoMensajeTimestamp = null;
-  console.log('🔄 Reset diario');
+  console.log('Reset diario');
 }, { timezone: 'America/Argentina/Buenos_Aires' });
 
 // ================= EVENTOS =================
@@ -175,7 +175,7 @@ client.on(Events.InteractionCreate, async interaction => {
   } catch (err) {
     console.error(err);
     await interaction.reply({
-      content: '❌ Error ejecutando el comando',
+      content: 'Error ejecutando el comando',
       ephemeral: true
     });
   }

@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require("discord.js");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('info')
-    .setDescription('Muestra la hora actual y los participantes'),
+    .setDescription('Muestra la hora actual y los participantes del server'),
 
   async execute(interaction) {
     await interaction.deferReply();

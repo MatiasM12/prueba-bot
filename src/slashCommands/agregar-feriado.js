@@ -58,7 +58,7 @@ module.exports = {
     guardarFeriados(data);
 
     await interaction.reply(
-      `✅ Feriado agregado:\n📅 **${fecha}** – ${nombre}`
+      `✅ Feriado agregado:\n **${fecha}** – ${nombre}`
     );
   }
 };

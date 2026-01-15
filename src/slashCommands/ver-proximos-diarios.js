@@ -12,7 +12,7 @@ function obtenerProximoDiaHabil(fecha) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ver_proximos_diarios')
-    .setDescription('Simula el diario para los próximos días')
+    .setDescription('Simula el diario para los próximos n días')
     .addIntegerOption(opt =>
       opt.setName('dias')
         .setDescription('Cantidad de días hábiles')
@@ -25,7 +25,7 @@ module.exports = {
     const dias = interaction.options.getInteger('dias');
     const data = cargarListaMiembros();
 
-    // 👉 SOLO activos
+    // SOLO activos
     const activos = data.miembros.filter(m => m.activo);
 
     if (activos.length === 0) {

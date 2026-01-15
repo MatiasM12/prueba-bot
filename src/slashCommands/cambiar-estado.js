@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('cambiar_estado')
-    .setDescription('Activar o desactivar un miembro')
+    .setDescription('Cambia el estado de un miembro a activo o inactivo')
     .addUserOption(opt =>
       opt.setName('usuario')
         .setDescription('Usuario')

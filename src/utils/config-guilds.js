@@ -19,7 +19,7 @@ function cargarConfig() {
     return JSON.parse(contenido);
 
   } catch (err) {
-    console.error('❌ Error leyendo config.json, se resetea:', err.message);
+    console.error('Error leyendo config.json, se resetea:', err.message);
     return {};
   }
 }
